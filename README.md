@@ -359,66 +359,6 @@ app.use((err, req, res, next) => {
   });
 });
 
-📁 Project Structure
-text
-
-horizon-bank-app/
-├── backend/
-│   ├── config/
-│   │   ├── firebase.js          # Firebase Admin configuration
-│   │   └── session.js           # Session management
-│   ├── controllers/
-│   │   ├── authController.js    # Authentication logic
-│   │   └── transactionController.js # Transaction logic
-│   ├── middleware/
-│   │   ├── auth.js              # JWT verification
-│   │   ├── rateLimiting.js      # Rate limit configuration
-│   │   └── validation.js        # Input validation rules
-│   ├── routes/
-│   │   ├── authRoutes.js        # Auth endpoints
-│   │   └── transactionRoutes.js # Transaction endpoints
-│   ├── utils/
-│   │   └── password.js          # Password hashing utilities
-│   ├── ssl/
-│   │   ├── certificate.pem      # SSL certificate
-│   │   └── private-key.pem      # SSL private key
-│   ├── .env                     # Environment variables
-│   ├── server.js                # Application entry point
-│   └── package.json
-│
-├── frontend/
-│   ├── public/
-│   ├── src/
-│   │   ├── components/
-│   │   │   ├── LoadingSpinner.jsx
-│   │   │   ├── Navbar.jsx
-│   │   │   ├── ProtectedRoute.jsx
-│   │   │   └── TransactionCard.jsx
-│   │   ├── pages/
-│   │   │   ├── Register.jsx     # Sign up page
-│   │   │   ├── Login.jsx        # Sign in page
-│   │   │   ├── Dashboard.jsx    # User dashboard
-│   │   │   ├── NewTransaction.jsx # Payment form
-│   │   │   └── TransactionHistory.jsx # Transaction list
-│   │   ├── services/
-│   │   │   ├── api.js           # API client
-│   │   │   └── firebase.js      # Firebase config
-│   │   ├── utils/
-│   │   │   ├── validation.js    # Input validation
-│   │   │   └── helpers.js       # Helper functions
-│   │   ├── context/
-│   │   │   └── AuthContext.jsx  # Auth state management
-│   │   ├── App.js               # Main app component
-│   │   └── index.js
-│   ├── ssl/
-│   │   ├── certificate.pem
-│   │   └── private-key.pem
-│   ├── .env
-│   ├── .env.local
-│   └── package.json
-│
-└── README.md
-
 🚀 Installation
 Prerequisites
 
@@ -433,7 +373,7 @@ Prerequisites
 Step 1: Clone the Repository
 bash
 
-git clone https://github.com/ST10081737/horizon-bank-app.git
+git clone https://github.com/Jessicamvita816/Horizon_Bank.git
 cd horizon-bank-app
 
 Step 2: Backend Setup
