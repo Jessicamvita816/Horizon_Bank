@@ -48,6 +48,21 @@ export const validateAccountNumber = (accountNumber) => {
     return { valid: true, error: null };
 };
 
+// Employee ID validation - EMP followed by 3 digits
+export const validateEmployeeId = (employeeId) => {
+    const employeeRegex = /^EMP\d{3}$/i;
+
+    if (!employeeId || employeeId.trim().length === 0) {
+        return { valid: false, error: 'Employee ID is required' };
+    }
+
+    if (!employeeRegex.test(employeeId.toUpperCase())) {
+        return { valid: false, error: 'Employee ID must be in format EMP001 (EMP followed by 3 digits)' };
+    }
+
+    return { valid: true, error: null };
+};
+
 // Password validation - Strong password requirements
 export const validatePassword = (password) => {
     if (!password || password.length === 0) {
@@ -71,6 +86,35 @@ export const validatePassword = (password) => {
     }
 
     if (!/[@$!%*?&]/.test(password)) {
+        return { valid: false, error: 'Password must contain at least one special character (@$!%*?&)' };
+    }
+
+    return { valid: true, error: null };
+};
+
+// Employee Password validation - Stronger requirements
+export const validateEmployeePassword = (password) => {
+    if (!password || password.length === 0) {
+        return { valid: false, error: 'Password is required' };
+    }
+
+    if (password.length < 10) {
+        return { valid: false, error: 'Employee password must be at least 10 characters' };
+    }
+
+    if (!/[a-z]/.test(password)) {
+        return { valid: false, error: 'Password must contain at least one lowercase letter' };
+    }
+
+    if (!/[A-Z]/.test(password)) {
+        return { valid: false, error: 'Password must contain at least one uppercase letter' };
+    }
+
+    if (!/\d/.test(password)) {
+        return { valid: false, error: 'Password must contain at least one number' };
+    }
+
+    if (!/[@$!%*?&#]/.test(password)) {
         return { valid: false, error: 'Password must contain at least one special character (@$!%*?&)' };
     }
 

@@ -2,13 +2,16 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
+import EmployeeRoute from './components/EmployeeRoute';
 
 // Pages
-import Register from './pages/Register';  // This is SIGN UP page
-import Login from './pages/Login';        // This is SIGN IN page
+import Register from './pages/Register';
+import Login from './pages/Login';
+import EmployeeLogin from './pages/EmployeeLogin';
 import Dashboard from './pages/Dashboard';
 import NewTransaction from './pages/NewTransaction';
 import TransactionHistory from './pages/TransactionHistory';
+import EmployeeDashboard from './pages/EmployeeDashboard';
 
 function App() {
   return (
@@ -16,10 +19,11 @@ function App() {
       <AuthProvider>
         <Routes>
           {/* Public Routes */}
-          <Route path="/register" element={<Register />} />  {/* SIGN UP */}
-          <Route path="/login" element={<Login />} />        {/* SIGN IN */}
+          <Route path="/register" element={<Register />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/employee-login" element={<EmployeeLogin />} />
 
-          {/* Protected Routes - Need authentication */}
+          {/* CUSTOMER PROTECTED ROUTES - Only for customers */}
           <Route
             path="/dashboard"
             element={
@@ -28,7 +32,6 @@ function App() {
               </ProtectedRoute>
             }
           />
-
           <Route
             path="/new-transaction"
             element={
@@ -37,7 +40,6 @@ function App() {
               </ProtectedRoute>
             }
           />
-
           <Route
             path="/history"
             element={
@@ -47,10 +49,44 @@ function App() {
             }
           />
 
-          {/* Default Route - Redirect to login */}
-          <Route path="/" element={<Navigate to="/login" replace />} />
+          {/* EMPLOYEE PROTECTED ROUTES - Only for employees */}
+          <Route
+            path="/employee/dashboard"
+            element={
+              <EmployeeRoute>
+                <EmployeeDashboard />
+              </EmployeeRoute>
+            }
+          />
+          
+          {/* Add these employee-specific routes */}
+          <Route
+            path="/employee/pending"
+            element={
+              <EmployeeRoute>
+                <EmployeeDashboard initialTab="pending" />
+              </EmployeeRoute>
+            }
+          />
+          <Route
+            path="/employee/completed"
+            element={
+              <EmployeeRoute>
+                <EmployeeDashboard initialTab="completed" />
+              </EmployeeRoute>
+            }
+          />
+          <Route
+            path="/employee/customers"
+            element={
+              <EmployeeRoute>
+                <EmployeeDashboard initialTab="customers" />
+              </EmployeeRoute>
+            }
+          />
 
-          {/* 404 Route - Redirect to login */}
+          {/* Default & 404 */}
+          <Route path="/" element={<Navigate to="/login" replace />} />
           <Route path="*" element={<Navigate to="/login" replace />} />
         </Routes>
       </AuthProvider>

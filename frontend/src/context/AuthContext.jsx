@@ -24,7 +24,7 @@ export const AuthProvider = ({ children }) => {
         const unsubscribe = onAuthStateChanged(auth, async (user) => {
             if (user) {
                 setCurrentUser(user);
-                // Load user profile from localStorage or fetch from API
+                // Load user profile from localStorage
                 const storedProfile = localStorage.getItem('userProfile');
                 if (storedProfile) {
                     setUserProfile(JSON.parse(storedProfile));
@@ -32,6 +32,7 @@ export const AuthProvider = ({ children }) => {
             } else {
                 setCurrentUser(null);
                 setUserProfile(null);
+                localStorage.removeItem('userProfile');
             }
             setLoading(false);
         });
@@ -52,11 +53,12 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
-    // Login function
+    // Customer Login function
     const login = async (accountNumber, password) => {
         try {
             setError(null);
-            // Call backend login API
+            setLoading(true);
+            
             const response = await authAPI.login({ accountNumber, password });
 
             if (response.success && response.token) {
@@ -64,8 +66,13 @@ export const AuthProvider = ({ children }) => {
                 await signInWithCustomToken(auth, response.token);
 
                 // Store user profile
-                setUserProfile(response.user);
-                localStorage.setItem('userProfile', JSON.stringify(response.user));
+                const userProfileData = {
+                    ...response.user,
+                    isEmployee: false,
+                    role: 'customer'
+                };
+                setUserProfile(userProfileData);
+                localStorage.setItem('userProfile', JSON.stringify(userProfileData));
 
                 return response;
             }
@@ -73,14 +80,50 @@ export const AuthProvider = ({ children }) => {
             const errorMessage = err.response?.data?.message || 'Login failed';
             setError(errorMessage);
             throw new Error(errorMessage);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // Employee Login function
+    const employeeLogin = async (employeeId, password) => {
+        try {
+            setError(null);
+            setLoading(true);
+            
+            const response = await authAPI.employeeLogin({ employeeId, password });
+
+            if (response.success && response.token) {
+                // Sign in with custom token
+                await signInWithCustomToken(auth, response.token);
+
+                // Store employee profile
+                const employeeProfileData = {
+                    ...response.user,
+                    isEmployee: true,
+                    role: 'employee'
+                };
+                setUserProfile(employeeProfileData);
+                localStorage.setItem('userProfile', JSON.stringify(employeeProfileData));
+
+                return response;
+            }
+        } catch (err) {
+            const errorMessage = err.response?.data?.message || 'Employee login failed';
+            setError(errorMessage);
+            throw new Error(errorMessage);
+        } finally {
+            setLoading(false);
         }
     };
 
     // Logout function
     const logout = async () => {
         try {
-            // Call backend logout
-            await authAPI.logout();
+            // Call backend logout if user is authenticated
+            if (currentUser) {
+                await authAPI.logout();
+            }
 
             // Sign out from Firebase
             await signOut(auth);
@@ -89,6 +132,7 @@ export const AuthProvider = ({ children }) => {
             localStorage.removeItem('userProfile');
             setUserProfile(null);
             setCurrentUser(null);
+            setError(null);
         } catch (err) {
             console.error('Logout error:', err);
             // Force logout even if API call fails
@@ -104,8 +148,13 @@ export const AuthProvider = ({ children }) => {
         try {
             const response = await authAPI.getProfile();
             if (response.success) {
-                setUserProfile(response.user);
-                localStorage.setItem('userProfile', JSON.stringify(response.user));
+                const profileData = {
+                    ...response.user,
+                    isEmployee: response.user.isAdmin || false,
+                    role: response.user.isAdmin ? 'employee' : 'customer'
+                };
+                setUserProfile(profileData);
+                localStorage.setItem('userProfile', JSON.stringify(profileData));
             }
         } catch (err) {
             console.error('Fetch profile error:', err);
@@ -119,13 +168,14 @@ export const AuthProvider = ({ children }) => {
         error,
         register,
         login,
+        employeeLogin,
         logout,
         fetchUserProfile
     };
 
     return (
         <AuthContext.Provider value={value}>
-            {!loading && children}
+            {children}
         </AuthContext.Provider>
     );
 };

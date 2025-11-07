@@ -17,13 +17,13 @@ const api = axios.create({
 api.interceptors.request.use(
     async (config) => {
         console.log('API Request:', config.method.toUpperCase(), config.url);
-        console.log('Request Headers Before:', config.headers); // Log initial headers
+        console.log('Request Headers Before:', config.headers);
         const user = auth.currentUser;
         if (user) {
             const token = await user.getIdToken();
             config.headers.Authorization = `Bearer ${token}`;
             console.log('Auth token added to request, UID:', user.uid);
-            console.log('Request Headers After:', config.headers); // Log headers after adding token
+            console.log('Request Headers After:', config.headers);
         } else {
             console.warn('No authenticated user found. Request will proceed without token.');
         }
@@ -48,9 +48,6 @@ api.interceptors.response.use(
             console.error('Response status:', error.response.status);
             if (error.response.status === 401) {
                 console.log('Unauthorized - logging instead of redirect for debug');
-                // Temporarily comment out redirect
-                // localStorage.removeItem('userProfile');
-                // window.location.href = '/login';
             }
         } else if (error.request) {
             console.error('No response from server:', error.request);
@@ -69,6 +66,10 @@ export const authAPI = {
     },
     login: async (credentials) => {
         const response = await api.post('/auth/login', credentials);
+        return response.data;
+    },
+    employeeLogin: async (credentials) => {
+        const response = await api.post('/auth/employee-login', credentials);
         return response.data;
     },
     getProfile: async () => {
@@ -105,6 +106,18 @@ export const transactionAPI = {
     },
     getAllUsers: async () => {
         const response = await api.get('/transactions/all-users');
+        return response.data;
+    },
+    getPendingTransactions: async () => {
+        const response = await api.get('/transactions/pending');
+        return response.data;
+    },
+    verifyTransaction: async (transactionId) => {
+        const response = await api.post(`/transactions/${transactionId}/verify`);
+        return response.data;
+    },
+    submitToSwift: async () => {
+        const response = await api.post('/transactions/submit-to-swift');
         return response.data;
     }
 };

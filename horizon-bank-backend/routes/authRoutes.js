@@ -1,8 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const authController = require('../controllers/authController');
-const { validateRegistration, validateLogin } = require('../middleware/validation');
-const { loginLimiter, registerLimiter } = require('../middleware/rateLimiting');
+const { validateRegistration, validateLogin, validateEmployeeLogin } = require('../middleware/validation');
+const { loginLimiter, registerLimiter, employeeLoginLimiter } = require('../middleware/rateLimiting');
 const { verifyToken } = require('../middleware/auth');
 
 /**
@@ -25,6 +25,17 @@ router.post('/login',
     loginLimiter,
     validateLogin,
     authController.login
+);
+
+/**
+ * @route   POST /api/auth/employee-login
+ * @desc    Login employee
+ * @access  Public
+ */
+router.post('/employee-login',
+    employeeLoginLimiter,
+    validateEmployeeLogin,
+    authController.employeeLogin
 );
 
 /**

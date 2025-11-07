@@ -122,6 +122,74 @@ exports.login = async (req, res) => {
     }
 };
 
+exports.employeeLogin = async (req, res) => {
+    try {
+        const { employeeId, password } = req.body;
+
+        console.log(`Employee login attempt: ${employeeId}`);
+
+        // Find employee by accountNumber starting with EMP
+        const employeeQuery = await db.collection('users')
+            .where('accountNumber', '==', employeeId.toUpperCase())
+            .limit(1)
+            .get();
+
+        if (employeeQuery.empty) {
+            return res.status(401).json({
+                success: false,
+                message: 'Invalid employee credentials'
+            });
+        }
+
+        const employeeDoc = employeeQuery.docs[0];
+        const employeeData = employeeDoc.data();
+
+        // Check if user is actually an employee
+        if (!employeeData.isAdmin) {
+            return res.status(401).json({
+                success: false,
+                message: 'Employee access required'
+            });
+        }
+
+        // Verify password
+        const isValid = await verifyPassword(password, employeeData.passwordHash);
+
+        if (!isValid) {
+            return res.status(401).json({
+                success: false,
+                message: 'Invalid employee credentials'
+            });
+        }
+
+        // Create custom token
+        const customToken = await auth.createCustomToken(employeeDoc.id);
+
+        console.log(`Employee logged in: ${employeeData.accountNumber}`);
+
+        res.json({
+            success: true,
+            message: 'Employee login successful',
+            token: customToken,
+            user: {
+                uid: employeeDoc.id,
+                fullName: employeeData.fullName,
+                accountNumber: employeeData.accountNumber,
+                email: employeeData.email,
+                isAdmin: true,
+                role: 'employee'
+            }
+        });
+
+    } catch (error) {
+        console.error('Employee login error:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Employee login failed'
+        });
+    }
+};
+
 exports.getProfile = async (req, res) => {
     try {
         const userDoc = await db.collection('users').doc(req.user.uid).get();
