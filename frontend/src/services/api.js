@@ -88,6 +88,7 @@ export const authAPI = {
 
 // Transaction API endpoints
 export const transactionAPI = {
+    // Customer endpoints
     initiateTransaction: async (transactionData) => {
         const response = await api.post('/transactions/initiate', transactionData);
         return response.data;
@@ -108,12 +109,26 @@ export const transactionAPI = {
         const response = await api.get('/transactions/all-users');
         return response.data;
     },
+
+    // Employee endpoints
     getPendingTransactions: async () => {
         const response = await api.get('/transactions/pending');
         return response.data;
     },
+    getCompletedTransactions: async () => {
+        const response = await api.get('/transactions/completed');
+        return response.data;
+    },
+    getAllCustomers: async () => {
+        const response = await api.get('/transactions/customers');
+        return response.data;
+    },
     verifyTransaction: async (transactionId) => {
         const response = await api.post(`/transactions/${transactionId}/verify`);
+        return response.data;
+    },
+    rejectTransaction: async (transactionId, reason) => {
+        const response = await api.post(`/transactions/${transactionId}/reject`, { reason });
         return response.data;
     },
     submitToSwift: async () => {
