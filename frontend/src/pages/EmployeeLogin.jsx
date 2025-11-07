@@ -190,15 +190,6 @@ const EmployeeLogin = () => {
                         </button>
                     </form>
 
-                    {/* Demo Credentials */}
-                    <div className="mt-6 p-4 bg-purple-500/10 border border-purple-500/30 rounded-xl">
-                        <h3 className="text-sm font-semibold text-purple-200 mb-2">Demo Credentials:</h3>
-                        <div className="text-xs text-purple-300 space-y-1">
-                            <p><strong>EMP001</strong> / SecureEmp1@123!</p>
-                            <p><strong>EMP002</strong> / SecureEmp2@123!</p>
-                        </div>
-                    </div>
-
                     {/* Switch to Customer Login */}
                     <div className="mt-6 text-center">
                         <p className="text-purple-200 text-sm">
