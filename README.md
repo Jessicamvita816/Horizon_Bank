@@ -1,888 +1,566 @@
-Horizon International Bank - Secure Payment Portal
-📋 Table of Contents
-
-    Overview
-
-    Features
-
-    Tech Stack
-
-    Security Features
-
-    Project Structure
-
-    Installation
-
-    Configuration
-
-    Running the Application
-
-    API Documentation
-
-    Security Best Practices
-
-    Testing Guide
-
-    Contributing
-
-    License
-
-🎯 Overview
-
-Horizon International Bank Secure Payment Portal is a modern web application that enables customers to securely initiate international SWIFT payments. Built with enterprise-grade security standards, the platform ensures safe and reliable international money transfers for our global customers.
-Key Objectives
-
-    Secure Transactions: Implement multiple layers of security for international payments
-
-    User-Friendly Interface: Provide intuitive payment initiation and tracking
-
-    Real-Time Processing: Enable quick and efficient payment processing
-
-    Compliance: Meet international banking security standards
-
-    Audit Trail: Maintain comprehensive transaction records
-
-✨ Features
-💳 Payment Management
-
-    SWIFT Payment Processing: Initiate international payments through SWIFT network
-
-    Real-Time Transaction History: View complete payment history with status tracking
-
-    Payment Search: Advanced search and filtering capabilities
-
-    Auto-Complete: Intelligent recipient account number suggestions
-
-    Multi-Currency Support: Process payments in various currencies (USD, EUR, GBP, etc.)
-
-🔐 Authentication & Security
-
-    Secure Registration: Password-protected account creation with strong validation
-
-    Bcrypt Password Hashing: Industry-standard password encryption
-
-    HTTPS/SSL Encryption: End-to-end encryption for all communications
-
-    Session Management: Secure session handling with automatic timeout
-
-    Input Validation: Comprehensive server-side and client-side validation
-
-📊 User Dashboard
-
-    Account Overview: Quick view of account details and recent activity
-
-    Transaction Monitoring: Real-time payment status updates
-
-    Profile Management: Secure personal information management
-
-    Export Capabilities: Download transaction history for record keeping
-
-🛡️ Security Features
-
-    Rate Limiting: Protection against brute force attacks
-
-    SQL Injection Prevention: Input sanitization and parameterized queries
-
-    XSS Protection: Cross-site scripting prevention measures
-
-    CSRF Protection: Cross-site request forgery mitigation
-
-    Clickjacking Prevention: X-Frame-Options implementation
-
-🛠 Tech Stack
-Frontend
-
-    React 18+: Modern UI library with hooks
-
-    React Router v6: Client-side routing
-
-    Axios: HTTP client with interceptors
-
-    Tailwind CSS: Utility-first CSS framework
-
-    Lucide React: Modern icon library
-
-    HTTPS: Secure development server
-
-Backend
-
-    Node.js: JavaScript runtime
-
-    Express.js: Web application framework
-
-    Firebase Firestore: NoSQL database
-
-    Firebase Admin SDK: Authentication and database management
-
-    bcryptjs: Password hashing library
-
-    Helmet.js: Security headers middleware
-
-    express-rate-limit: Rate limiting middleware
-
-    express-validator: Input validation middleware
-
-Security & Deployment
-
-    HTTPS/SSL: Self-signed certificates for development
-
-    Environment Variables: Secure configuration management
-
-    CORS: Cross-Origin Resource Sharing configuration
-
-    Firebase Security Rules: Database security rules
-
-🔒 Security Features
-1. Authentication Security
-Password Security
-
-    Bcrypt Hashing: 12 rounds of salting for maximum security
-
-    Password Peppering: Server-side secret added to passwords before hashing
-
-    Strong Password Requirements:
-
-        Minimum 8 characters
-
-        At least 1 uppercase letter (A-Z)
-
-        At least 1 lowercase letter (a-z)
-
-        At least 1 number (0-9)
-
-        At least 1 special character (@$!%*?&)
-
-javascript
-
-// Password Hashing Implementation
-const PEPPER = process.env.PASSWORD_PEPPER;
-const SALT_ROUNDS = 12;
-
-async function hashPassword(password) {
-  const pepperedPassword = password + PEPPER;
-  return await bcrypt.hash(pepperedPassword, SALT_ROUNDS);
-}
-
-Session Security
-
-    JWT Tokens: Stateless authentication with Firebase
-
-    HTTPS Encryption: All sessions encrypted in transit
-
-    Automatic Expiration: Token regeneration on login
-
-    Secure Storage: Tokens stored securely in client
-
-2. Data Protection
-Input Validation & Sanitization
-
-    RegEx Whitelisting: All inputs validated using regular expressions
-
-    Server-Side Validation: Comprehensive backend validation
-
-    XSS Prevention: Input sanitization to remove script tags
-
-    SQL Injection Protection: No raw SQL queries (Firestore)
-
-javascript
-
-// Input Validation Example
-export const validateFullName = (name) => {
-  const nameRegex = /^[a-zA-Z\s]{2,100}$/;
-  
-  if (!name || name.trim().length === 0) {
-    return { valid: false, error: 'Full name is required' };
-  }
-  
-  if (!nameRegex.test(name)) {
-    return { valid: false, error: 'Name must contain only letters and spaces' };
-  }
-  
-  return { valid: true, error: null };
-};
-
-Validation Rules Table
-Field	RegEx Pattern	Description
-Full Name	/^[a-zA-Z\s]{2,100}$/	Letters and spaces only, 2-100 chars
-ID Number	/^\d{13}$/	Exactly 13 digits
-Account Number	/^[a-zA-Z0-9]{8,20}$/	Alphanumeric, 8-20 characters
-SWIFT Code	/^[A-Z]{6}[A-Z0-9]{2}([A-Z0-9]{3})?$/	8 or 11 characters
-Amount	Float (0.01 - 1,000,000)	Positive number validation
-3. API Security
-Request Security
-
-    HTTPS Only: All API calls encrypted with SSL/TLS
-
-    CORS Configuration: Whitelisted origins only
-
-    Rate Limiting: Protection against DDoS and brute force attacks
-
-    Content Validation: Strict content-type checking
-
-javascript
-
-// Rate Limiting Configuration
-const loginLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 5, // Limit each IP to 5 login requests per window
-  message: 'Too many login attempts. Please try again after 15 minutes.'
-});
-
-app.post('/api/auth/login', loginLimiter, loginController);
-
-Rate Limiting Rules
-
-    Login: 5 attempts per 15 minutes
-
-    Registration: 3 attempts per hour
-
-    Transactions: 20 per hour
-
-    API Requests: 100 per 15 minutes
-
-4. Database Security
-Firebase Firestore Security
-
-    NoSQL Database: No SQL injection vulnerabilities
-
-    Security Rules: Role-based access control
-
-    Encrypted Connections: TLS for all database communications
-
-    Backup & Recovery: Automated database backups
-
-Database Structure
-text
-
-users/ (collection)
-  |-- {userId}/ (document)
-      |-- fullName: string
-      |-- idNumber: string
-      |-- accountNumber: string
-      |-- passwordHash: string
-      |-- email: string
-      |-- createdAt: timestamp
-      |
-      `-- transactions/ (subcollection)
-          |-- {transactionId}/ (document)
-              |-- senderAccount: string
-              |-- recipientAccount: string
-              |-- amount: number
-              |-- currency: string
-              |-- swiftCode: string
-              |-- status: string
-              `-- createdAt: timestamp
-
-5. SSL/HTTPS Encryption
-Configuration
-
-    Frontend: HTTPS on port 3000
-
-    Backend: HTTPS on port 5000
-
-    Certificate: Self-signed for development, trusted CA for production
-
-    Protocol: TLS 1.2+ encryption
-
-javascript
-
-// HTTPS Server Setup
-const httpsOptions = {
-  key: fs.readFileSync('./ssl/private-key.pem'),
-  cert: fs.readFileSync('./ssl/certificate.pem')
-};
-
-https.createServer(httpsOptions, app).listen(5000, () => {
-  console.log('HTTPS Server running on port 5000');
-});
-
-6. Attack Protection
-SQL Injection Prevention
-
-    No Raw SQL: Uses Firebase Firestore (NoSQL)
-
-    Parameterized Queries: All queries use Firebase SDK
-
-    Input Sanitization: Removes SQL keywords from inputs
-
-XSS Prevention
-
-    Input Sanitization: Removes <script> tags and event handlers
-
-    React Protection: Built-in XSS protection in React
-
-    Content Security Policy: CSP headers implementation
-
-Session Hijacking Prevention
-
-    HTTPS Encryption: Prevents token interception
-
-    Token Expiration: Automatic token regeneration
-
-    Secure Storage: Proper token storage practices
-
-Clickjacking Prevention
-javascript
-
-// X-Frame-Options Header
-app.use(helmet.frameguard({ action: 'sameorigin' }));
-
-CSRF Prevention
-
-    SameSite Cookies: sameSite: 'strict' configuration
-
-    Token Authentication: JWT token-based authentication
-
-    Origin Validation: Request origin verification
-
-7. Error Handling & Logging
-Secure Error Management
-
-    Generic Error Messages: No system details exposed
-
-    Server-Side Logging: Comprehensive error logging
-
-    Audit Trail: Transaction and authentication logging
-
-    Stack Trace Protection: Hide stack traces in production
-
-javascript
-
-// Error Handler Middleware
-app.use((err, req, res, next) => {
-  console.error(err.stack); // Server-side logging only
-  
-  res.status(err.status || 500).json({
-    message: process.env.NODE_ENV === 'production' 
-      ? 'Internal server error' 
-      : err.message
-  });
-});
-
-🚀 Installation
-Prerequisites
-
-    Node.js: v18.x or higher
-
-    npm: v9.x or higher
-
-    Firebase Account: For authentication and database
-
-    OpenSSL: For generating SSL certificates
-
-Step 1: Clone the Repository
-bash
-
-git clone https://github.com/Jessicamvita816/Horizon_Bank.git
-cd horizon-bank-app
-
-Step 2: Backend Setup
-bash
-
-cd backend
-npm install
-
-# Install dependencies
-npm install express cors dotenv firebase-admin helmet \
-express-rate-limit express-validator bcryptjs cookie-parser
-
-# Install dev dependencies
-npm install nodemon --save-dev
-
-Step 3: Frontend Setup
-bash
-
-cd ../frontend
-npm install
-
-# Install React dependencies
-npm install firebase react-router-dom axios lucide-react
-
-# Install Tailwind CSS
-npm install -D tailwindcss postcss autoprefixer
-npx tailwindcss init -p
-
-Step 4: Generate SSL Certificates
-bash
-
-# Backend SSL
-cd ../backend
-mkdir ssl
-cd ssl
-
-# Generate private key
-openssl genrsa -out private-key.pem 2048
-
-# Generate certificate
-openssl req -new -key private-key.pem -out csr.pem
-openssl x509 -req -days 365 -in csr.pem -signkey private-key.pem -out certificate.pem
-
-# Copy to frontend
-cd ../..
-cd frontend
-mkdir ssl
-cp ../backend/ssl/certificate.pem ./ssl/
-cp ../backend/ssl/private-key.pem ./ssl/
-
-Certificate Information:
-
-    Country Name: KE
-
-    State: Nairobi
-
-    Locality: Nairobi
-
-    Organization: Horizon Bank
-
-    Common Name: localhost
-
-Step 5: Firebase Configuration
-
-    Create Firebase Project:
-
-        Go to Firebase Console
-
-        Create project: horizon-banking
-
-        Enable Authentication → Email/Password provider
-
-        Create Firestore Database in production mode
-
-    Download Service Account Key:
-
-        Go to Project Settings → Service Accounts
-
-        Generate New Private Key
-
-        Save as serviceAccountKey.json in backend root
-
-⚙️ Configuration
-Backend Environment Variables
-
-Create backend/.env file:
-bash
-
+# Horizon International Bank - Secure Payment Portal
+
+## Table of Contents
+- [Overview](#overview)
+- [Features](#features)
+- [Tech Stack](#tech-stack)
+- [Security Features](#security-features)
+- [Project Structure](#project-structure)
+- [Installation](#installation)
+- [Configuration](#configuration)
+- [Running the Application](#running-the-application)
+- [API Documentation](#api-documentation)
+- [Security Best Practices](#security-best-practices)
+- [Testing Guide](#testing-guide)
+
+---
+
+## Overview
+Horizon International Bank Secure Payment Portal is a modern, enterprise-grade web application that enables customers to securely initiate international SWIFT payments. It provides a seamless, compliant, and highly secure platform for global money transfers.
+
+### Key Objectives
+- Secure transaction processing with end-to-end encryption
+- Intuitive user interface for payment initiation and tracking
+- Real-time transaction status updates
+- Full compliance with international banking standards
+- Complete audit trail and transaction logging
+
+---
+
+## Features
+
+### Payment Management
+- SWIFT international payment processing
+- Real-time transaction history with status tracking
+- Advanced search and filtering of transactions
+- Recipient auto-complete with account validation
+- Multi-currency support (USD, EUR, GBP, ZAR, JPY, CNY)
+
+### Authentication & Security
+- Secure user registration with strong password policies
+- Bcrypt password hashing with server-side peppering
+- HTTPS/SSL encryption for all communications
+- Firebase Custom Token authentication
+- Session management with automatic token rotation
+
+### User Dashboard
+- Account overview and recent activity
+- Real-time payment status monitoring
+- Secure profile management
+- Transaction history export (CSV)
+
+### New: Employee Portal (Admin)
+- View all pending SWIFT transactions
+- Approve or reject payments
+- Submit approved transactions to SWIFT network
+- Full audit trail of employee actions
+
+---
+
+## Tech Stack
+
+### Frontend
+- **React 18+** with Hooks
+- **React Router v6** for navigation
+- **Axios** with interceptors for API calls
+- **Tailwind CSS** for styling
+- **Lucide React** icons
+
+### Backend
+- **Node.js** runtime environment
+- **Express.js** web framework
+- **Firebase Admin SDK** for authentication
+- **Firestore** (NoSQL) database
+- **bcryptjs** for password hashing
+- **Helmet.js** for security headers
+- **express-rate-limit** for API protection
+- **express-validator** for input validation
+
+### Security & Deployment
+- **HTTPS** with self-signed certificates (development)
+- **CORS** with origin whitelisting
+- Environment variable management
+- Firebase Security Rules
+
+---
+
+## Security Features
+
+### Authentication Security
+- **Password Hashing**: Bcrypt (12 rounds) + server-side pepper
+- **Strong Password Policy**:
+  - Minimum 8 characters
+  - 1 uppercase, 1 lowercase, 1 number, 1 special character
+- **JWT via Firebase Custom Tokens**
+- **HTTPS-only communication**
+
+### Data Protection
+- **Input Validation**: Client and server-side with RegEx whitelisting
+- **XSS Prevention**: Input sanitization removes `<script>` tags and event handlers
+- **SQL Injection Prevention**: NoSQL (Firestore) + parameterized queries
+- **CSRF Protection**: Token-based auth + SameSite cookies
+
+### API Security
+- **Rate Limiting**:
+  - Login: 5 attempts / 15 minutes
+  - Registration: 3 attempts / hour
+  - Transactions: 20 / hour
+  - General API: 100 / 15 minutes
+- **CORS**: Whitelisted origins only
+- **Helmet.js**: Security headers (HSTS, X-Frame-Options, CSP)
+
+### Database Security
+- **Firestore Security Rules**: Role-based access control
+- **Encrypted connections** (TLS)
+- **No raw SQL** — eliminates injection risk
+
+### SSL/HTTPS
+- Self-signed certificates for development
+- Enforced TLS 1.2+
+- Production-ready certificate rotation support
+
+### Attack Protection
+- **Brute Force**: Rate limiting + account lockout simulation
+- **Session Hijacking**: Token expiration + secure storage
+- **Clickjacking**: `X-Frame-Options: SAMEORIGIN`
+
+---
+
+## Project Structure
+
+```
+horizon-international-bank/
+├── client/                 # React frontend application
+│   ├── public/
+│   │   ├── index.html
+│   │   └── manifest.json
+│   ├── src/
+│   │   ├── components/     # Reusable UI components
+│   │   │   ├── auth/
+│   │   │   ├── dashboard/
+│   │   │   ├── payments/
+│   │   │   └── common/
+│   │   ├── contexts/       # React contexts
+│   │   ├── hooks/          # Custom React hooks
+│   │   ├── services/       # API service layer
+│   │   ├── utils/          # Utility functions
+│   │   └── App.js
+│   └── package.json
+├── server/                 # Node.js backend application
+│   ├── controllers/        # Route controllers
+│   ├── middleware/         # Custom middleware
+│   │   ├── auth.js
+│   │   ├── validation.js
+│   │   └── rateLimit.js
+│   ├── models/            # Data models
+│   ├── routes/            # API routes
+│   ├── utils/             # Utility functions
+│   ├── config/            # Configuration files
+│   └── server.js
+├── certificates/          # SSL certificates
+├── .env.example          # Environment variables template
+├── README.md             # Project documentation
+└── package.json          # Root package.json
+```
+
+### Key Directories Explained
+
+#### Frontend (`/client`)
+- **`/components/auth`**: Login, registration, and authentication components
+- **`/components/dashboard`**: User dashboard and transaction overview
+- **`/components/payments`**: Payment initiation, history, and management
+- **`/components/common`**: Shared UI components (buttons, modals, forms)
+- **`/contexts`**: React context for global state management
+- **`/services`**: API communication layer with Axios
+
+#### Backend (`/server`)
+- **`/controllers`**: Business logic for each route
+- **`/middleware`**: Authentication, validation, and security middleware
+- **`/models`**: Data models and Firestore schema
+- **`/routes`**: API endpoint definitions
+- **`/utils`**: Helper functions and security utilities
+
+---
+
+## Installation
+
+### Prerequisites
+- Node.js 16+ 
+- npm or yarn
+- Firebase project with Firestore
+- SSL certificates (for HTTPS)
+
+### Step-by-Step Setup
+
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/your-org/horizon-international-bank.git
+   cd horizon-international-bank
+   ```
+
+2. **Install dependencies**
+   ```bash
+   # Install root dependencies
+   npm install
+   
+   # Install client dependencies
+   cd client && npm install && cd ..
+   
+   # Install server dependencies  
+   cd horizon-bank-backend && npm install && cd ..
+   ```
+
+3. **Environment Configuration**
+   ```bash
+   # Copy environment template
+   cp .env.example .env
+   
+   # Edit with your Firebase credentials
+   nano .env
+   ```
+
+4. **Firebase Setup**
+   - Create a new Firebase project
+   - Enable Authentication and Firestore
+   - Generate Admin SDK private key
+   - Update `.env` with your credentials
+
+5. **SSL Certificate Setup** (Development)
+   ```bash
+   # Generate self-signed certificates
+   openssl req -x509 -newkey rsa:4096 -keyout certificates/key.pem -out certificates/cert.pem -days 365
+   ```
+
+---
+
+## Configuration
+
+### Environment Variables
+
+#### Server (.env)
+```env
 # Server Configuration
-PORT=5000
+PORT=3001
 NODE_ENV=development
 
 # Firebase Configuration
-FIREBASE_PROJECT_ID=horizon-banking-439aa
-FIREBASE_DATABASE_URL=https://horizon-banking-439aa-default-rtdb.firebaseio.com
+FIREBASE_PROJECT_ID=your-project-id
+FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n..."
+FIREBASE_CLIENT_EMAIL=firebase-adminsdk-xxx@your-project.iam.gserviceaccount.com
 
-# Security Keys (CHANGE IN PRODUCTION!)
-PASSWORD_PEPPER=your_secret_pepper_key_minimum_32_characters
-SESSION_SECRET=your_session_secret_key_minimum_32_characters
+# Security
+PASSWORD_PEPPER=your-super-secret-pepper
+JWT_SECRET=your-jwt-secret-key
 
-# CORS Configuration
-FRONTEND_URL=https://localhost:3000
-ALLOWED_ORIGINS=https://localhost:3000,http://localhost:3000
+# CORS
+ALLOWED_ORIGINS=https://localhost:3000
+```
 
-Frontend Environment Variables
+#### Client Environment
+Create `client/.env`:
+```env
+REACT_APP_API_URL=https://localhost:3001
+REACT_APP_FIREBASE_CONFIG={"apiKey":"...","authDomain":"...","projectId":"..."}
+```
 
-Create frontend/.env.local for HTTPS:
-bash
+### Firebase Security Rules
 
-HTTPS=true
-SSL_CRT_FILE=./ssl/certificate.pem
-SSL_KEY_FILE=./ssl/private-key.pem
-PORT=3000
+#### Firestore Rules
+```javascript
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Users can only read/write their own data
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // Payments: users see their own, employees see all
+    match /payments/{paymentId} {
+      allow read: if request.auth != null && 
+        (resource.data.userId == request.auth.uid || 
+         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'employee');
+      allow create: if request.auth != null;
+    }
+  }
+}
+```
 
-🏃 Running the Application
-Development Mode
-1. Start Backend Server
-bash
+---
 
-cd backend
-npm start
+## Running the Application
 
-# Expected output:
-# ========================================
-# HORIZON BANK API SERVER
-# ========================================
-# HTTPS Server: https://localhost:5000
-# Health: https://localhost:5000/api/health
-# ========================================
-# Firebase Admin SDK initialized successfully
+### Development Mode
 
-2. Start Frontend Development Server
-bash
+1. **Start the Backend Server**
+   ```bash
+   cd horizon-bank-backend
+   npm run dev
+   ```
+   Server will start on `https://localhost:3001`
 
-cd frontend
-npm start
+2. **Start the Frontend Client**
+   ```bash
+   cd client
+   npm start
+   ```
+   Client will start on `https://localhost:3000`
 
-# Expected output:
-# Compiled successfully!
-# You can now view frontend in the browser.
-#   Local:            https://localhost:3000
-#   On Your Network:  https://192.168.x.x:3000
+3. **Access the Application**
+   - Main Application: `https://localhost:3000`
+   - API Server: `https://localhost:3001`
 
-Accessing the Application
+### Production Build
 
-    Open web browser
+```bash
+# Build client
+cd client && npm run build && cd ..
 
-    Navigate to https://localhost:3000
+# Start production server
+cd horizon-bank-backend && npm start
+```
 
-    Accept SSL certificate warning:
+---
 
-        Chrome/Edge: Click "Advanced" → "Proceed to localhost (unsafe)"
+## API Documentation
 
-        Firefox: Click "Advanced" → "Accept the Risk and Continue"
+### Authentication Endpoints
 
-    You should see the login page
+#### POST `/api/auth/register`
+Register a new user account.
 
-Production Build
-bash
-
-# Build frontend
-cd frontend
-npm run build
-
-# Start production backend
-cd ../backend
-NODE_ENV=production npm start
-
-📚 API Documentation
-Base URL
-text
-
-https://localhost:5000/api
-
-Authentication Endpoints
-Register User
-http
-
-POST /api/auth/register
-Content-Type: application/json
-
+**Request Body:**
+```json
 {
-  "fullName": "John Doe",
-  "idNumber": "9001015800084",
-  "accountNumber": "ACC12345678",
+  "email": "user@example.com",
+  "password": "SecurePass123!",
+  "firstName": "John",
+  "lastName": "Doe",
+  "phone": "+1234567890"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "User registered successfully",
+  "userId": "abc123"
+}
+```
+
+#### POST `/api/auth/login`
+Authenticate user and return Firebase token.
+
+**Request Body:**
+```json
+{
+  "email": "user@example.com", 
   "password": "SecurePass123!"
 }
+```
 
-Response: 201 Created
+**Response:**
+```json
 {
   "success": true,
-  "message": "Registration successful",
+  "token": "firebase-custom-token",
   "user": {
-    "uid": "firebase-user-id",
-    "fullName": "John Doe",
-    "accountNumber": "ACC12345678"
+    "id": "abc123",
+    "email": "user@example.com",
+    "firstName": "John",
+    "lastName": "Doe"
   }
 }
+```
 
-Login User
-http
+### Payment Endpoints
 
-POST /api/auth/login
-Content-Type: application/json
+#### POST `/api/payments/create`
+Initiate a new SWIFT payment.
 
+**Request Body:**
+```json
 {
-  "accountNumber": "ACC12345678",
-  "password": "SecurePass123!"
-}
-
-Response: 200 OK
-{
-  "success": true,
-  "message": "Login successful",
-  "token": "firebase-custom-token-here",
-  "user": {
-    "uid": "user-id",
-    "fullName": "John Doe",
-    "accountNumber": "ACC12345678"
-  }
-}
-
-Get User Profile
-http
-
-GET /api/auth/profile
-Authorization: Bearer {token}
-
-Response: 200 OK
-{
-  "success": true,
-  "user": {
-    "fullName": "John Doe",
-    "accountNumber": "ACC12345678",
-    "email": "acc12345678@horizonbank.com",
-    "createdAt": "2025-01-04T10:00:00.000Z"
-  }
-}
-
-Transaction Endpoints
-Create SWIFT Payment
-http
-
-POST /api/transactions/initiate
-Authorization: Bearer {token}
-Content-Type: application/json
-
-{
-  "amount": 1000.50,
-  "currency": "USD",
-  "swiftCode": "ABCDEF2A",
-  "recipientAccount": "REC987654321",
   "recipientName": "Jane Smith",
-  "provider": "SWIFT"
+  "recipientAccount": "GB29NWBK60161331926819",
+  "recipientBank": "BARCLAYS BANK UK PLC",
+  "amount": 1500.00,
+  "currency": "USD",
+  "purpose": "Business Payment"
 }
+```
 
-Response: 201 Created
+**Response:**
+```json
 {
   "success": true,
-  "message": "Transaction completed",
-  "transaction": {
-    "id": "transaction-id",
-    "amount": 1000.50,
-    "currency": "USD",
-    "status": "completed",
-    "createdAt": "2025-01-04T10:30:00.000Z"
-  }
+  "paymentId": "pay_123456",
+  "status": "pending",
+  "swiftReference": "HZBNGB2LXXX123456789"
 }
+```
 
-Get Transaction History
-http
+#### GET `/api/payments/history`
+Retrieve user's payment history.
 
-GET /api/transactions/my-transactions
-Authorization: Bearer {token}
+**Query Parameters:**
+- `page` (optional): Page number (default: 1)
+- `limit` (optional): Items per page (default: 10)
+- `status` (optional): Filter by status
 
-Response: 200 OK
+**Response:**
+```json
 {
   "success": true,
-  "count": 5,
-  "transactions": [
-    {
-      "id": "transaction-1",
-      "senderAccount": "ACC12345678",
-      "recipientName": "Jane Smith",
-      "amount": 1000.50,
-      "currency": "USD",
-      "status": "completed",
-      "createdAt": "2025-01-04T10:30:00.000Z"
-    }
-  ]
-}
-
-Error Responses
-400 Bad Request
-json
-
-{
-  "success": false,
-  "message": "Validation error",
-  "errors": {
-    "fullName": "Name must contain only letters and spaces",
-    "idNumber": "ID number must be exactly 13 digits"
+  "payments": [...],
+  "pagination": {
+    "page": 1,
+    "limit": 10,
+    "total": 45
   }
 }
+```
 
-401 Unauthorized
-json
+### Employee Endpoints
 
+#### GET `/api/employee/pending-payments`
+Get all pending payments (employee only).
+
+**Headers:**
+- `Authorization: Bearer {token}`
+
+**Response:**
+```json
 {
-  "success": false,
-  "message": "Authentication required"
+  "success": true,
+  "payments": [...],
+  "totalPending": 12
 }
+```
 
-403 Forbidden
-json
+#### POST `/api/employee/approve-payment`
+Approve a pending payment.
 
+**Request Body:**
+```json
 {
-  "success": false,
-  "message": "Invalid or expired token"
+  "paymentId": "pay_123456",
+  "action": "approve",
+  "notes": "Payment approved after verification"
 }
-
-429 Too Many Requests
-json
-
-{
-  "success": false,
-  "message": "Too many login attempts. Please try again after 15 minutes."
-}
-
-500 Internal Server Error
-json
-
-{
-  "success": false,
-  "message": "Internal server error"
-}
-
-🔐 Security Best Practices
-For Developers
-
-    Environment Security
-    bash
-
-# Secrets not committed
-echo ".env" >> .gitignore
-echo "serviceAccountKey.json" >> .gitignore
-echo "ssl/" >> .gitignore
-
-Dependency Security
-bash
-
-# Regular security audits
-npm audit
-npm audit fix
-npm update
-
-HTTPS Enforcement
-javascript
-
-// Force HTTPS in production
-if (process.env.NODE_ENV === 'production') {
-  app.use((req, res, next) => {
-    if (req.headers['x-forwarded-proto'] !== 'https') {
-      return res.redirect('https://' + req.headers.host + req.url);
-    }
-    next();
-  });
-}
-
-Security Headers
-javascript
-
-const helmet = require('helmet');
-app.use(helmet());
-
-    Input Validation
-
-        Always validate on server-side
-
-        Use whitelist approach with RegEx
-
-        Sanitize all user inputs
-
-For Production Deployment
-
-    Certificate Management
-
-        Use trusted CA certificates
-
-        Implement certificate rotation
-
-        Enable HSTS headers
-
-    Database Security
-
-        Enable Firebase security rules
-
-        Regular backup procedures
-
-        Access logging and monitoring
-
-    Monitoring & Logging
-
-        Implement comprehensive logging
-
-        Set up security alerts
-
-        Regular security audits
-
-🧪 Testing Guide
-Manual Testing Procedure
-Test 1: User Registration
-
-Test Case 1.1: Invalid Name Input
-
-    Navigate to https://localhost:3000/register
-
-    Enter name with numbers: "John123"
-
-    Expected: Error message "Name must contain only letters and spaces"
-
-Test Case 1.2: Invalid ID Number
-
-    Enter ID number with letters: "ABC1234567890"
-
-    Expected: Error message "ID number must be exactly 13 digits"
-
-Test Case 1.3: Weak Password
-
-    Enter password: "weak"
-
-    Expected: Password strength indicator shows "weak" in red
-
-    Expected: Error message about password requirements
-
-Test 2: User Authentication
-
-Test Case 2.1: Successful Login
-
-    Navigate to https://localhost:3000/login
-
-    Enter valid credentials
-
-    Expected: Redirect to dashboard with welcome message
-
-Test Case 2.2: Failed Login
-
-    Enter invalid credentials
-
-    Expected: Error message "Invalid account number or password"
-
-    Expected: Rate limiting after 5 failed attempts
-
-Test 3: Payment Processing
-
-Test Case 3.1: Valid SWIFT Payment
-
-    Navigate to New Transaction page
-
-    Enter valid payment details
-
-    Expected: Success message and transaction recorded
-
-Test Case 3.2: Invalid SWIFT Code
-
-    Enter invalid SWIFT code: "INVALID123"
-
-    Expected: Validation error for SWIFT code format
-
-Security Testing
-Test 4: Security Features
-
-Test Case 4.1: SQL Injection Attempt
-
-    Enter SQL injection payload in any field
-
-    Expected: Input rejected or sanitized
-
-Test Case 4.2: XSS Attempt
-
-    Enter script tags in input fields
-
-    Expected: Script tags removed or input rejected
-
-Test Case 4.3: Brute Force Protection
-
-    Attempt multiple rapid logins
-
-    Expected: Rate limiting activates after 5 attempts
-
-
-Code Standards
-
-    Follow JavaScript/React best practices
-
-    Write comprehensive validation for all inputs
-
-    Include security considerations in all features
-
-    Document all security implementations
-
-Security Review Process
-
-All contributions undergo security review including:
-
-    Code security audit
-
-    Vulnerability assessment
-
-    Penetration testing considerations
-
-    Compliance verification
+```
+
+---
+
+## Security Best Practices
+
+### Password Security
+```javascript
+// Example password validation
+const passwordPolicy = {
+  minLength: 8,
+  requireUppercase: true,
+  requireLowercase: true, 
+  requireNumbers: true,
+  requireSpecialChars: true
+};
+
+// Password hashing with bcrypt and pepper
+const hashPassword = async (password) => {
+  const pepperedPassword = password + process.env.PASSWORD_PEPPER;
+  return await bcrypt.hash(pepperedPassword, 12);
+};
+```
+
+### Input Validation
+```javascript
+// Express validator rules
+const validatePayment = [
+  body('amount').isFloat({ min: 1, max: 1000000 }),
+  body('currency').isIn(['USD', 'EUR', 'GBP', 'ZAR', 'JPY', 'CNY']),
+  body('recipientAccount').matches(/^[A-Z0-9]{8,34}$/),
+  body('purpose').isLength({ max: 140 })
+];
+```
+
+### Rate Limiting Configuration
+```javascript
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 5, // Limit each IP to 5 requests per windowMs
+  message: 'Too many login attempts, please try again later.'
+});
+```
+
+---
+
+## Testing Guide
+
+### Running Tests
+
+```bash
+# Backend tests
+cd horizon-bank-backend && npm test
+
+# Frontend tests  
+cd client && npm test
+
+# End-to-end tests
+npm run test:e2e
+```
+
+### Test Coverage Areas
+
+#### Authentication Tests
+- User registration with valid/invalid data
+- Login success and failure cases
+- Password strength validation
+- Token expiration and refresh
+
+#### Payment Tests
+- SWIFT payment creation
+- Input validation for payment data
+- Transaction status updates
+- Error handling for insufficient funds
+
+#### Security Tests
+- SQL injection attempts
+- XSS payload detection
+- Rate limiting enforcement
+- Authorization checks
+
+#### Integration Tests
+- End-to-end payment flow
+- Employee approval workflow
+- Real-time status updates
+- Error scenarios and recovery
+
+### Manual Testing Checklist
+
+#### Authentication Flow
+- [ ] User registration with strong password
+- [ ] Login with correct credentials
+- [ ] Login failure with wrong password
+- [ ] Session persistence
+- [ ] Logout functionality
+
+#### Payment Flow  
+- [ ] Create new SWIFT payment
+- [ ] Input validation for payment fields
+- [ ] Payment status updates
+- [ ] Transaction history display
+- [ ] Search and filter functionality
+
+#### Employee Portal
+- [ ] View pending payments
+- [ ] Approve/reject payments
+- [ ] Audit trail recording
+- [ ] Role-based access control
+
+#### Security Testing
+- [ ] HTTPS enforcement
+- [ ] XSS protection
+- [ ] CSRF protection
+- [ ] Rate limiting
+- [ ] Input sanitization
